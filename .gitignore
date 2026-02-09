@@ -1,0 +1,15 @@
+# python venv
+.venv/
+venv/
+
+# python cache
+__pycache__/
+*.pyc
+
+# build output (будем генерить)
+dist/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
