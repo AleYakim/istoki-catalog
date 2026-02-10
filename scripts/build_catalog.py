@@ -2,7 +2,6 @@ import json
 import os
 import shutil
 import hashlib
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -21,7 +20,7 @@ SONGS_URL = PAGES_BASE + SONGS_JSON_NAME  # https://aleyakim.github.io/istoki-ca
 
 
 def _s(v: Any) -> str:
-    """string cell -> trimmed string, None -> '' """
+    """Cell value -> trimmed string, None -> ''."""
     if v is None:
         return ""
     return str(v).strip()
@@ -54,6 +53,7 @@ def _fail(msg: str) -> None:
 def _warn(msg: str) -> None:
     print(f"WARNING: {msg}")
 
+
 def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -63,6 +63,7 @@ def _read_file_bytes(path: str) -> Optional[bytes]:
         return None
     with open(path, "rb") as f:
         return f.read()
+
 
 def read_meta(ws) -> Dict[str, str]:
     meta: Dict[str, str] = {}
@@ -78,7 +79,8 @@ def read_meta(ws) -> Dict[str, str]:
 def sheet_headers(ws) -> Dict[str, int]:
     # First row is headers
     headers: Dict[str, int] = {}
-    for idx, cell in enumerate(next(ws.iter_rows(min_row=1, max_row=1, values_only=True))):
+    first = next(ws.iter_rows(min_row=1, max_row=1, values_only=True))
+    for idx, cell in enumerate(first):
         name = _s(cell)
         if name:
             headers[name] = idx
@@ -143,7 +145,7 @@ def build_version_dict(row: Tuple[Any, ...], h: Dict[str, int]) -> Tuple[str, Di
     if not ver_id:
         _fail(f"versions: empty id for songId={song_id}")
 
-    # SongVersion fields are nullable in Kotlin -> we’ll omit keys when empty
+    # SongVersion fields are nullable in Kotlin -> omit keys when empty
     ver: Dict[str, Any] = {"id": ver_id}
     for k in ["title", "lyrics", "sourceNote", "audioUrl", "minusUrl", "videoUrl"]:
         v = _opt(get_cell(row, h, k))
@@ -279,41 +281,47 @@ def main() -> None:
     # stable order
     songs: List[Dict[str, Any]] = [songs_by_id[k] for k in sorted(songs_by_id.keys())]
 
-        # Prepare new songs.json bytes (deterministic) for writing + comparisons
-        new_songs_json_bytes = json.dumps(songs, ensure_ascii=False, indent=2).encode("utf-8")
+    # Prepare new songs.json bytes (deterministic) for writing + comparisons
+    new_songs_json_bytes = json.dumps(songs, ensure_ascii=False, indent=2).encode("utf-8")
 
-            # --- strict versioning gate (enabled in CI) ---
-            strict = os.getenv("STRICT_VERSIONING", "").strip().lower() in ("1", "true", "yes", "on")
+    # --- strict versioning gate (enabled in CI) ---
+    strict = os.getenv("STRICT_VERSIONING", "").strip().lower() in ("1", "true", "yes", "on")
 
-            old_latest_bytes = _read_file_bytes(os.path.join(DOCS_DIR, LATEST_JSON_NAME))
-            old_songs_bytes = _read_file_bytes(os.path.join(DOCS_DIR, SONGS_JSON_NAME))
+    old_latest_bytes = _read_file_bytes(os.path.join(DOCS_DIR, LATEST_JSON_NAME))
+    old_songs_bytes = _read_file_bytes(os.path.join(DOCS_DIR, SONGS_JSON_NAME))
 
-            if strict and old_latest_bytes is not None:
-                try:
-                    old_manifest = json.loads(old_latest_bytes.decode("utf-8"))
-                    old_version = int(old_manifest.get("catalogVersion", 0))
-                    old_base_media_url = str(old_manifest.get("baseMediaUrl", "")).strip()
-                except Exception as e:
-                    _fail(f"STRICT_VERSIONING: cannot parse existing docs/latest.json: {e}")
+    if strict and old_latest_bytes is not None:
+        try:
+            old_manifest = json.loads(old_latest_bytes.decode("utf-8"))
+            old_version = int(old_manifest.get("catalogVersion", 0))
+            old_base_media_url = str(old_manifest.get("baseMediaUrl", "")).strip()
+        except Exception as e:
+            _fail(f"STRICT_VERSIONING: cannot parse existing docs/latest.json: {e}")
 
-                songs_changed = False
-                if old_songs_bytes is not None:
-                    songs_changed = _sha256_bytes(old_songs_bytes) != _sha256_bytes(new_songs_json_bytes)
+        songs_changed = False
+        if old_songs_bytes is not None:
+            try:
+                # Parse old JSON and re-dump with same formatting to avoid false diff from line endings
+                old_obj = json.loads(old_songs_bytes.decode("utf-8"))
+                old_norm_bytes = json.dumps(old_obj, ensure_ascii=False, indent=2).encode("utf-8")
+                songs_changed = _sha256_bytes(old_norm_bytes) != _sha256_bytes(new_songs_json_bytes)
+            except Exception as e:
+                _fail(f"STRICT_VERSIONING: cannot parse existing docs/songs.json: {e}")
 
-                base_media_changed = old_base_media_url != base_media_url.strip()
+        base_media_changed = old_base_media_url != base_media_url.strip()
 
-                if (songs_changed or base_media_changed) and catalog_version <= old_version:
-                    details = []
-                    if songs_changed:
-                        details.append("songs.json changed")
-                    if base_media_changed:
-                        details.append(f"baseMediaUrl changed ('{old_base_media_url}' -> '{base_media_url.strip()}')")
+        if (songs_changed or base_media_changed) and catalog_version <= old_version:
+            details = []
+            if songs_changed:
+                details.append("songs.json changed")
+            if base_media_changed:
+                details.append(f"baseMediaUrl changed ('{old_base_media_url}' -> '{base_media_url.strip()}')")
 
-                    _fail(
-                        "STRICT_VERSIONING: content changed but catalogVersion was not bumped. "
-                        f"old={old_version}, new={catalog_version}. Причина: {', '.join(details)}. "
-                        "Открой input/istoki.xlsx → sheet meta → catalogVersion и увеличь (например +1), затем commit/push."
-                    )
+            _fail(
+                "STRICT_VERSIONING: content changed but catalogVersion was not bumped. "
+                f"old={old_version}, new={catalog_version}. Причина: {', '.join(details)}. "
+                "Открой input/istoki.xlsx → sheet meta → catalogVersion и увеличь (например +1), затем commit/push."
+            )
 
     os.makedirs(DIST_DIR, exist_ok=True)
     os.makedirs(DOCS_DIR, exist_ok=True)
@@ -321,8 +329,9 @@ def main() -> None:
     songs_path_dist = os.path.join(DIST_DIR, SONGS_JSON_NAME)
     latest_path_dist = os.path.join(DIST_DIR, LATEST_JSON_NAME)
 
-      with open(songs_path_dist, "wb") as f:
-          f.write(new_songs_json_bytes)
+    # Write songs.json (bytes)
+    with open(songs_path_dist, "wb") as f:
+        f.write(new_songs_json_bytes)
 
     manifest = {
         "catalogVersion": catalog_version,
