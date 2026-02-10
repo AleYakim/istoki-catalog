@@ -33,6 +33,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build catalog
+        env:
+          STRICT_VERSIONING: "1"
         run: |
           python scripts/build_catalog.py
 
