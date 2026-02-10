@@ -1,0 +1,51 @@
+name: Build catalog (xlsx -> json)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "input/**"
+      - "scripts/**"
+      - "requirements.txt"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build catalog
+        run: |
+          python scripts/build_catalog.py
+
+      - name: Commit and push docs if changed
+        run: |
+          if git diff --quiet -- docs; then
+            echo "No changes in docs/; nothing to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/songs.json docs/latest.json
+          git commit -m "chore(catalog): rebuild docs"
+          git push
