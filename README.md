@@ -25,3 +25,13 @@ id — идентификатор версии (например v1, short, choi
 songId должен совпадать с songs.id
 term и definition не пустые
 если у песни нет глоссария — просто нет строк для этой песни"
+
+пушить через xls через cmd:
+git status
+git add input/istoki.xlsx
+git commit -m "Catalog: update workbook"
+git push
+Если git push отклонит (remote впереди), тогда добавляется:
+Bash
+git pull --rebase origin main
+git push
