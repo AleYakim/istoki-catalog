@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Истоки — Голос народной памяти</title>
+    <meta name="description" content="Бесплатное приложение для сохранения русских народных и казачьих песен. Тексты, аудио, словарь, викторина.">
+    <meta property="og:title" content="Истоки — Голос народной памяти">
+    <meta property="og:description" content="Собираем и храним русские народные и казачьи песни, чтобы они продолжали звучать.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://aleyakim.github.io/istoki-catalog/og-image.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        :root {
+            --green: #1B6B4A;
+            --green-light: #2E8B63;
+            --green-dark: #0F4A32;
+            --gold: #B08D4C;
+            --gold-light: #CBA86A;
+            --cream: #F5F0E8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Georgia', 'PT Serif', serif;
+            color: #333;
+            background: var(--cream);
+            line-height: 1.6;
+        }
+
+        /* === HERO === */
+        .hero {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(176,141,76,0.1) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+        .hero-emoji { font-size: 64px; margin-bottom: 16px; }
+        .hero h1 { font-size: 3em; margin-bottom: 8px; font-weight: 700; }
+        .hero .slogan { font-size: 1.3em; color: var(--gold-light); margin-bottom: 24px; }
+        .hero .mission { font-size: 1.1em; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
+        .hero .cta-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .btn-primary { background: var(--gold); color: white; }
+        .btn-secondary { background: rgba(255,255,255,0.15); color: white; border: 2px solid rgba(255,255,255,0.3); }
+
+        /* === SECTIONS === */
+        section { padding: 60px 20px; max-width: 1000px; margin: 0 auto; }
+        .section-title {
+            font-size: 2em;
+            color: var(--green-dark);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        /* === FEATURES === */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+        .feature-card:hover { transform: translateY(-4px); }
+        .feature-emoji { font-size: 36px; margin-bottom: 12px; }
+        .feature-card h3 { color: var(--green); margin-bottom: 8px; font-size: 1.2em; }
+        .feature-card p { color: #555; font-size: 0.95em; }
+
+        /* === STATS === */
+        .stats-bar {
+            background: var(--green);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 2.5em; font-weight: 700; color: var(--gold-light); }
+        .stat-label { font-size: 0.9em; opacity: 0.85; }
+
+        /* === AUDIENCE === */
+        .audience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .audience-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--gold);
+        }
+        .audience-card .emoji { font-size: 32px; margin-bottom: 8px; }
+        .audience-card h4 { color: var(--green); margin-bottom: 6px; }
+
+        /* === QUOTES === */
+        .quote-card {
+            background: white;
+            border-left: 4px solid var(--gold);
+            border-radius: 0 12px 12px 0;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .quote-card .text { font-style: italic; font-size: 1.05em; margin-bottom: 8px; }
+        .quote-card .author { color: var(--gold); font-weight: 600; }
+
+        /* === CTA === */
+        .cta-section {
+            background: linear-gradient(135deg, var(--green-dark), var(--green));
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+            border-radius: 24px;
+            margin: 40px auto;
+            max-width: 900px;
+        }
+        .cta-section h2 { margin-bottom: 12px; font-size: 2em; }
+        .cta-section p { opacity: 0.9; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+        /* === FOOTER === */
+        footer {
+            background: var(--green-dark);
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            padding: 32px 20px;
+            font-size: 0.9em;
+        }
+        footer a { color: var(--gold-light); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        .footer-links { margin-bottom: 12px; }
+        .footer-links a { margin: 0 12px; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2em; }
+            .hero .slogan { font-size: 1.1em; }
+            .stats-grid { gap: 24px; }
+            .stat-number { font-size: 2em; }
+            section { padding: 40px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-content">
+        <div class="hero-emoji">🌿</div>
+        <h1>Истоки</h1>
+        <div class="slogan">Голос народной памяти</div>
+        <p class="mission">
+            Бесплатное приложение для сохранения и популяризации русской народной
+            и казачьей песенной традиции. Собираем, систематизируем и делаем доступными
+            песни, которые веками объединяли людей.
+        </p>
+        <div class="cta-group">
+            <a href="#download" class="btn btn-primary">Скачать приложение</a>
+            <a href="https://github.com/AleYakim/Istoki" class="btn btn-secondary" target="_blank">GitHub</a>
+        </div>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-number">200+</div>
+            <div class="stat-label">песен в каталоге</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">12+</div>
+            <div class="stat-label">регионов</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">бесплатно</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">0</div>
+            <div class="stat-label">рекламы</div>
+        </div>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<section>
+    <h2 class="section-title">Возможности</h2>
+    <p class="section-subtitle">Всё для сохранения и изучения песенной традиции</p>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-emoji">🎵</div>
+            <h3>Каталог песен</h3>
+            <p>Тексты, жанры, регионы, контекст. Полнотекстовый поиск и фильтры.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-emoji">🎧</div>
+            <h3>Аудиоплеер</h3>
+            <p>Слушайте оригинальные исполнения с визуализатором звука.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-emoji">📖</div>
+            <h3>Глоссарий</h3>
+            <p>Словарь устаревших и диалектных слов с привязкой к песням.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-emoji">⚔️</div>
+            <h3>Казачьи песни</h3>
+            <p>Отдельный раздел: Дон, Кубань, Терек, Запорожье и другие войска.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-emoji">🎤</div>
+            <h3>Караоке и разучивание</h3>
+            <p>Построчный суфлёр, минусовки, голосовые партии для хора.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-emoji">🧩</div>
+            <h3>Викторина</h3>
+            <p>Проверьте знание песен — по жанру, региону или всему каталогу.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-emoji">📅</div>
+            <h3>Песенный календарь</h3>
+            <p>Какие песни пели на Масленицу, Купалу, Покров — привязка к датам.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-emoji">🎓</div>
+            <h3>Для образования</h3>
+            <p>Готовые конспекты уроков, привязка к ФГОС, методические рекомендации.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-emoji">🏆</div>
+            <h3>Геймификация</h3>
+            <p>Уровни, достижения, ежедневные задания, коллекционные карточки.</p>
+        </div>
+    </div>
+</section>
+
+<!-- AUDIENCE -->
+<section>
+    <h2 class="section-title">Для кого</h2>
+    <p class="section-subtitle">Приложение полезно всем, кто интересуется народной культурой</p>
+    <div class="audience-grid">
+        <div class="audience-card">
+            <div class="emoji">👨‍🏫</div>
+            <h4>Педагоги</h4>
+            <p>Готовые материалы для уроков музыки и культуры</p>
+        </div>
+        <div class="audience-card">
+            <div class="emoji">🎵</div>
+            <h4>Ансамбли и хоры</h4>
+            <p>Репертуар, партии, сет-листы, режим выступления</p>
+        </div>
+        <div class="audience-card">
+            <div class="emoji">👶</div>
+            <h4>Семьи с детьми</h4>
+            <p>Детский режим, колыбельные, игровые песни</p>
+        </div>
+        <div class="audience-card">
+            <div class="emoji">🔬</div>
+            <h4>Исследователи</h4>
+            <p>Систематизированный каталог с метаданными</p>
+        </div>
+        <div class="audience-card">
+            <div class="emoji">❤️</div>
+            <h4>Все неравнодушные</h4>
+            <p>Для каждого, кто хочет прикоснуться к традиции</p>
+        </div>
+    </div>
+</section>
+
+<!-- QUOTES -->
+<section>
+    <h2 class="section-title">О важности сохранения</h2>
+    <div class="quote-card">
+        <div class="text">«Песня — душа народа. Пока звучит песня — жив народ.»</div>
+        <div class="author">— Русская пословица</div>
+    </div>
+    <div class="quote-card">
+        <div class="text">«Народная песня — это живая история, рассказанная голосами поколений.»</div>
+        <div class="author">— Из экспедиционных заметок</div>
+    </div>
+    <div class="quote-card">
+        <div class="text">«Каждая утраченная песня — это потерянная страница нашей общей памяти.»</div>
+        <div class="author">— Фольклорист</div>
+    </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section" id="download">
+    <h2>Начните сохранять традицию</h2>
+    <p>Скачайте «Истоки» бесплатно и присоединитесь к тем, кто хранит песенное наследие.</p>
+    <div class="cta-group">
+        <a href="#" class="btn btn-primary">Google Play (скоро)</a>
+        <a href="https://github.com/AleYakim/Istoki/releases" class="btn btn-secondary" target="_blank">Скачать APK</a>
+    </div>
+</div>
+
+<!-- SUPPORT -->
+<section>
+    <h2 class="section-title">Поддержать проект</h2>
+    <p class="section-subtitle">
+        «Истоки» — некоммерческий проект. Мы открыты к сотрудничеству с образовательными
+        учреждениями, фольклорными ансамблями, музеями и грантодателями.
+    </p>
+    <div style="text-align: center;">
+        <a href="mailto:istoki.app.feedback@gmail.com" class="btn btn-primary">
+            Написать нам
+        </a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-links">
+        <a href="https://github.com/AleYakim/Istoki" target="_blank">GitHub</a>
+        <a href="mailto:istoki.app.feedback@gmail.com">Контакты</a>
+        <a href="https://aleyakim.github.io/istoki-catalog/">Каталог</a>
+    </div>
+    <p>© 2024–2025 Истоки • Голос народной памяти</p>
+    <p style="margin-top: 8px; font-size: 0.85em;">Все песни принадлежат народу</p>
+</footer>
+
+</body>
+</html>
