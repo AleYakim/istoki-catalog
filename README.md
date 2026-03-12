@@ -35,3 +35,34 @@ git push
 Bash
 git pull --rebase origin main
 git push
+
+/////////////////////////////////////////////////////////////
+
+## Сборка каталога
+
+### Ручная сборка через GitHub Actions
+1. Перейти на вкладку [Actions](../../actions)
+2. Выбрать **Manual Build Catalog**
+3. Нажать **Run workflow**
+4. Опционально указать причину
+5. Нажать зелёную кнопку **Run workflow**
+
+Каталог обновится автоматически через ~30 секунд.
+
+### Локальная сборка
+Требования:
+- Python 3.8+
+- Библиотеки: `pandas`, `openpyxl`
+
+```bash
+# Установка зависимостей (один раз)
+pip install pandas openpyxl
+
+# Сборка каталога
+cd istoki-catalog
+python scripts/build_catalog.py
+
+# Коммит и отправка
+git add docs/
+git commit -m "Обновлён каталог"
+git push
